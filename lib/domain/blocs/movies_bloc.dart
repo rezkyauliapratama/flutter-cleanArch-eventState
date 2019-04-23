@@ -1,31 +1,48 @@
-import 'dart:async';
-
 import 'package:dio/dio.dart';
+import 'package:meta/meta.dart';
 import 'package:movies_db_bloc/data/common/secret_components.dart';
 import 'package:movies_db_bloc/data/data_providers/movies_provider_api.dart';
 import 'package:movies_db_bloc/data/repositories/movies_repository.dart';
 import 'package:movies_db_bloc/domain/providers/app_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 export 'package:movies_db_bloc/data/data_providers/movies_provider_api.dart';
 
 class MoviesBloc {
-  final MoviesRepository repo;
+  final MoviesRepository _repo;
+  int _page = 1;
 
-  StreamController<ListMoviesSchema> _streamController = StreamController<ListMoviesSchema>.broadcast();
-  Sink<ListMoviesSchema> get _inMoviesStream => _streamController.sink;
-  Stream<ListMoviesSchema> get outMoviesStream => _streamController.stream;
+  PublishSubject<MoviesEvent> _eventController = PublishSubject<MoviesEvent>();
+  final _itemsOutput = BehaviorSubject<List<Movies>>();
 
-  MoviesBloc(this.repo);
+  //getter sink
+  Function(MoviesEvent) get emitEvent => _eventController.sink.add;
 
-  fetchMovies() async {
-    final listMovies = await repo.fetchItem();
-    _inMoviesStream.add(listMovies);
+  //getter stream
+  Observable<List<Movies>> get outMovies =>
+      _itemsOutput.stream.asBroadcastStream();
+
+  MoviesBloc(this._repo) {
+//    _eventController.pipe(_itemsOutput);
   }
 
-  void dispose() {
-    print("Dispose of Information Bloc");
-    _streamController.close();
+  Future<List<Movies>> fetchMovies() async {
+    ListMoviesSchema moviesSchema = await _repo.fetchItem(page: _page++);
+    return moviesSchema.results;
   }
+
+  dispose() {
+    print('dispose moviesBloc');
+    _eventController.close();
+    _itemsOutput.close();
+  }
+}
+
+abstract class MoviesEvent {}
+
+@immutable
+class FetchMoviesEvent extends MoviesEvent {
+  FetchMoviesEvent();
 }
 
 MoviesBloc buildBloc(AppProvider appProvider) {

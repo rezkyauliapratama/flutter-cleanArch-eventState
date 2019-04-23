@@ -3,39 +3,30 @@ import 'package:movies_db_bloc/data/models/api/list_movies_schema.dart';
 import 'package:movies_db_bloc/data/models/api/movie_schema.dart';
 import 'package:movies_db_bloc/domain/blocs/movies_bloc.dart';
 import 'package:movies_db_bloc/domain/providers/base_provider.dart';
+import 'package:movies_db_bloc/presenter/widgets/pagination_list_widget.dart';
 
 class MoviesListView extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     print('MoviesListView');
-    final bloc = Provider.of<MoviesBloc>(context);
-    bloc.fetchMovies();
+    final moviesBloc = Provider.of<MoviesBloc>(context);
 
-    return buildList(bloc);
+    moviesBloc.emitEvent(FetchMoviesEvent());
+
+    return buildList(moviesBloc);
   }
 
-  Widget buildList(MoviesBloc bloc) {
+  Widget buildList(MoviesBloc moviesBloc) {
     return Scaffold(
-      appBar: AppBar(title: Text('Movies DB')),
-      body: StreamBuilder(
-        stream: bloc.outMoviesStream,
-        builder:
-            (BuildContext context, AsyncSnapshot<ListMoviesSchema> snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          return ListView.builder(
-              itemCount: snapshot.data.results.length,
-              itemBuilder: (context, int index) {
-                return moviesListTile(snapshot.data.results[index]);
-              });
-        },
-      ),
-    );
+        appBar: AppBar(title: Text('Movies DB')),
+        body: PaginationList(
+          pageBuilder: (int currentListSize) {
+            return moviesBloc.fetchMovies();
+          },
+          itemBuilder: (int index, item) {
+            return moviesListTile(item);
+          },
+        ));
   }
 
   Widget moviesListTile(Movies item) {
@@ -56,9 +47,8 @@ class MoviesListView extends StatelessWidget {
         ),
         Divider(
           height: 8.0,
-        )
+        ),
       ],
     );
   }
-
 }

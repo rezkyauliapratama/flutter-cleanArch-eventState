@@ -6,12 +6,12 @@ class MoviesRepository {
 
   MoviesRepository({this.sources});
 
-  Future<ListMoviesSchema> fetchItem() async {
+  Future<ListMoviesSchema> fetchItem({int page = 1}) async {
     ListMoviesSchema item;
     MovieInterface source;
 
     for (source in sources) {
-      item = await source.getListMovies();
+      item = await source.getListMovies(page);
       if (item != null) {
         break;
       }
@@ -23,5 +23,5 @@ class MoviesRepository {
 }
 
 abstract class MovieInterface {
-  Future<ListMoviesSchema> getListMovies();
+  Future<ListMoviesSchema> getListMovies(int page);
 }

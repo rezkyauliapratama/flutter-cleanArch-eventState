@@ -12,11 +12,11 @@ class MoviesProviderApi implements MovieInterface {
 
   MoviesProviderApi(this._dio, this._secretLoader);
 
-  Future<ListMoviesSchema> getListMovies() async {
+  Future<ListMoviesSchema> getListMovies(int page) async {
     try {
 
       Secret secret = await _secretLoader.load();
-      Response response = await _dio.get(_urlPopularMovies, queryParameters: {"api_key": secret.apiKey, "language": "en-US"});
+      Response response = await _dio.get(_urlPopularMovies, queryParameters: {"api_key": secret.apiKey, "language": "en-US", "page": page});
       return ListMoviesSchema.fromJson(response.data);
     } catch (error, stacktrace) {
       print("Exception occured: $error stackTrace: $stacktrace");
