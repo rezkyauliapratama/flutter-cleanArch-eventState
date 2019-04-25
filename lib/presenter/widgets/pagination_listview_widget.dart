@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -37,6 +36,9 @@ class PaginationList<T> extends StatefulWidget {
     this.itemExtent,
     this.cacheExtent,
     this.semanticChildCount,
+    this.mainAxisSpacing = 0.0,
+    this.crossAxisSpacing = 0.0,
+    this.childAspectRatio = 1.0
   })  : assert(pageBuilder != null),
         assert(itemBuilder != null),
         super(key: key);
@@ -72,6 +74,9 @@ class PaginationList<T> extends StatefulWidget {
   final bool addSemanticIndexes = true;
   final double cacheExtent;
   final int semanticChildCount;
+  final double childAspectRatio;
+  final double crossAxisSpacing;
+  final double mainAxisSpacing;
 
   @override
   _PaginationListState<T> createState() => _PaginationListState<T>();
@@ -113,6 +118,10 @@ class _PaginationListState<T> extends State<PaginationList<T>> {
 
   @override
   Widget build(BuildContext context) {
+    return _buildListView();
+  }
+
+  Widget _buildListView() {
     return ListView.builder(
       padding: widget.padding,
       controller: widget.controller,
@@ -131,23 +140,22 @@ class _PaginationListState<T> extends State<PaginationList<T>> {
           return widget.itemBuilder(position, _list[position]);
         } else if (position == _list.length && !_isEndOfList) {
           fetchMore();
-          return widget.progress ?? defaultLoading();
+          return widget.progress ?? _defaultLoading();
         }
-        return null;
+        return Container();
       },
     );
   }
-
-  Widget defaultLoading() {
-    return Align(
-      child: SizedBox(
-        height: 40,
-        width: 40,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: CircularProgressIndicator(),
-        ),
+}
+Widget _defaultLoading() {
+  return Align(
+    child: SizedBox(
+      height: 40,
+      width: 40,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: CircularProgressIndicator(),
       ),
-    );
-  }
+    ),
+  );
 }
