@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 /// Signature for a function that returns a Future List of type 'T' i.e. list
 /// of items in a particular page that is being asynchronously called.
@@ -133,18 +134,23 @@ class _PaginationGridState<T> extends State<PaginationGrid<T>> {
         },
         child: Stack(
           children: <Widget>[
-            GridView.builder(
+            StaggeredGridView.countBuilder(
               itemCount: _list.length+1,
               itemBuilder: (context, position) {
                 if(position < _list.length){
                   return widget.itemBuilder(position, _list[position]);
+                }else{
+                  return widget.progress ?? _defaultLoading();
                 }
               },
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-            ),
-            Positioned(bottom: 10.0,
-              child: _isLoading ? widget.progress ?? _defaultLoading() : Container(),
+             crossAxisCount: 8,
+              staggeredTileBuilder: (int index) {
+                if (index < _list.length) {
+                  return StaggeredTile.count(4, 4);
+                }else{
+                  return StaggeredTile.count(8, 1);
+                }
+              },
             )
           ],
         ));
