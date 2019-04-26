@@ -12,4 +12,3 @@ void main() {
     secretPath: "secrets.json",
   ));
 }
-

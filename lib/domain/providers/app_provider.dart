@@ -47,7 +47,7 @@ class AppProvider extends InheritedWidget {
           "Request ${options.uri} \n"
           "-- headers --\n"
           "${options.headers.toString()} \n"
-          "-- payload --\n  x"
+          "-- payload --\n"
           "${jsonEncode(options.data)} \n"
           "");
 
