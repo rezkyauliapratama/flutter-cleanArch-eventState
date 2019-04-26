@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 /// Signature for a function that returns a Future List of type 'T' i.e. list
 /// of items in a particular page that is being asynchronously called.
@@ -23,23 +24,16 @@ class PaginationGrid<T> extends StatefulWidget {
   /// The arguments [pageBuilder], [itemBuilder] must not be null.
   PaginationGrid(
       {Key key,
+      @required this.crossAxisCount,
       @required this.pageBuilder,
       @required this.itemBuilder,
       this.scrollDirection = Axis.vertical,
       this.progress,
+      this.endOfList,
       this.onError,
-      this.reverse = false,
-      this.controller,
-      this.primary,
-      this.physics,
-      this.padding,
-      this.itemExtent,
-      this.cacheExtent,
-      this.semanticChildCount,
-      this.mainAxisSpacing = 0.0,
-      this.crossAxisSpacing = 0.0,
-      this.childAspectRatio = 1.0})
+      this.padding})
       : assert(pageBuilder != null),
+        assert(crossAxisCount != null),
         assert(itemBuilder != null),
         super(key: key);
 
@@ -59,24 +53,17 @@ class PaginationGrid<T> extends StatefulWidget {
   /// When non-null [progress] widget is called to show loading progress
   final Widget progress;
 
+  /// When non-null [endOfList] widget is called to TextView
+  final Widget endOfList;
+
   /// Handle error returned by the Future implemented in [pageBuilder]
   final Function(dynamic error) onError;
 
-  final bool reverse;
-  final ScrollController controller;
-  final bool primary;
-  final ScrollPhysics physics;
   final bool shrinkWrap = false;
   final EdgeInsetsGeometry padding;
-  final double itemExtent;
   final bool addAutomaticKeepAlives = true;
   final bool addRepaintBoundaries = true;
-  final bool addSemanticIndexes = true;
-  final double cacheExtent;
-  final int semanticChildCount;
-  final double childAspectRatio;
-  final double crossAxisSpacing;
-  final double mainAxisSpacing;
+  final int crossAxisCount;
 
   @override
   _PaginationGridState<T> createState() => _PaginationGridState<T>();
@@ -86,6 +73,8 @@ class _PaginationGridState<T> extends State<PaginationGrid<T>> {
   final List<T> _list = List();
   bool _isLoading = false;
   bool _isEndOfList = false;
+  int _columnCount = 2;
+  int _totalColumn = 4;
 
   void fetchMore() {
     if (!_isLoading) {
@@ -117,6 +106,9 @@ class _PaginationGridState<T> extends State<PaginationGrid<T>> {
   void initState() {
     super.initState();
     fetchMore();
+    _totalColumn = widget.crossAxisCount * 3;
+    _columnCount = _totalColumn ~/ widget.crossAxisCount;
+    print("$_columnCount");
   }
 
   @override
@@ -131,22 +123,32 @@ class _PaginationGridState<T> extends State<PaginationGrid<T>> {
             fetchMore();
           }
         },
-        child: Stack(
-          children: <Widget>[
-            GridView.builder(
-              itemCount: _list.length+1,
-              itemBuilder: (context, position) {
-                if(position < _list.length){
-                  return widget.itemBuilder(position, _list[position]);
-                }
-              },
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-            ),
-            Positioned(bottom: 10.0,
-              child: _isLoading ? widget.progress ?? _defaultLoading() : Container(),
-            )
-          ],
+        child: StaggeredGridView.countBuilder(
+          addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+          shrinkWrap: widget.shrinkWrap,
+          padding: widget.padding,
+          addRepaintBoundaries: widget.addRepaintBoundaries,
+          itemCount: _list.length + 1,
+          itemBuilder: (context, position) {
+            if (position < _list.length) {
+              return widget.itemBuilder(position, _list[position]);
+            } else {
+              if (_isLoading && !_isEndOfList) {
+                return widget.progress ?? _defaultLoading();
+              } else {
+                return widget.endOfList ?? Container();
+              }
+            }
+          },
+          crossAxisCount: _totalColumn,
+          staggeredTileBuilder: (int index) {
+            if (index < _list.length) {
+              return StaggeredTile.count(
+                  _columnCount,_columnCount);
+            } else {
+              return StaggeredTile.count(_totalColumn, 1);
+            }
+          },
         ));
   }
 }

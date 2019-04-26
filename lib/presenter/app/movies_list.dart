@@ -25,7 +25,7 @@ class MoviesListView extends StatelessWidget {
           },
           itemBuilder: (int index, Movies item) {
             return moviesListTile(item);
-          },
+          }, crossAxisCount: 2,
         ));
   }
 
@@ -84,7 +84,7 @@ class MoviesListView extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        const SizedBox(height: 4.0),
+        SizedBox(height: 4.0),
         Text(
           movieCard.voteAverage.toString(),
           style: const TextStyle(
