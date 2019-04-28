@@ -8,15 +8,13 @@ import 'package:movies_db_bloc/presenter/widgets/pagination_gridview_widget.dart
 class MoviesListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print('MoviesListView');
     final moviesBloc = Provider.of<MoviesBloc>(context);
-
     moviesBloc.emitEvent(FetchMoviesEvent());
 
-    return buildList(moviesBloc);
+    return buildList(context, moviesBloc);
   }
 
-  Widget buildList(MoviesBloc moviesBloc) {
+  Widget buildList(BuildContext context, MoviesBloc moviesBloc) {
     return Scaffold(
         appBar: AppBar(title: Text('Movies DB')),
         body: PaginationGrid(
@@ -24,12 +22,13 @@ class MoviesListView extends StatelessWidget {
             return moviesBloc.fetchMovies();
           },
           itemBuilder: (int index, Movies item) {
-            return moviesListTile(item);
-          }, crossAxisCount: 2,
+            return moviesListTile(context, item);
+          },
+          crossAxisCount: 2,
         ));
   }
 
-  Widget moviesListTile(Movies item) {
+  Widget moviesListTile(BuildContext context, Movies item) {
     List<Widget> children = <Widget>[
       ClipRect(
         clipper: _SquareClipper(),
@@ -48,10 +47,16 @@ class MoviesListView extends StatelessWidget {
       ),
     ];
 
-    return Card(
-      child: Stack(
-        fit: StackFit.expand,
-        children: children,
+    return GestureDetector(
+      onTap: () {
+        print("ontap");
+        Navigator.pushNamed(context, "/${item.id}");
+      },
+      child: Card(
+        child: Stack(
+          fit: StackFit.expand,
+          children: children,
+        ),
       ),
     );
   }

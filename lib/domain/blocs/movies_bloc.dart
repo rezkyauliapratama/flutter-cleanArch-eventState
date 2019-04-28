@@ -22,9 +22,7 @@ class MoviesBloc {
   Observable<List<Movies>> get outMovies =>
       _itemsOutput.stream.asBroadcastStream();
 
-  MoviesBloc(this._repo) {
-//    _eventController.pipe(_itemsOutput);
-  }
+  MoviesBloc(this._repo);
 
   Future<List<Movies>> fetchMovies() async {
     ListMoviesSchema moviesSchema = await _repo.fetchItem(page: _page++);

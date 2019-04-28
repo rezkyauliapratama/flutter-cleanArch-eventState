@@ -1,4 +1,3 @@
-
 import 'package:movies_db_bloc/data/models/api/list_movies_schema.dart';
 
 class MoviesRepository {
@@ -19,7 +18,6 @@ class MoviesRepository {
 
     return item;
   }
-
 }
 
 abstract class MovieInterface {
